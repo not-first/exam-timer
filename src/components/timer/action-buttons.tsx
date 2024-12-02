@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { examTimerSelector, useTimerStore } from "@/lib/store";
+import { examTimerSelector, useTimerStore } from "@/lib/stores/timer-store";
 import {
   FastForward,
   MoreVertical,
@@ -23,12 +23,14 @@ interface ActionButtonsProps {
   showSeconds: boolean;
   setShowSeconds: (show: boolean) => void;
   buttonsVisible: boolean;
+  onExitRequest: () => void;
 }
 
 export function ActionButtons({
   showSeconds,
   setShowSeconds,
   buttonsVisible,
+  onExitRequest,
 }: ActionButtonsProps) {
   const {
     currentSection,
@@ -36,7 +38,6 @@ export function ActionButtons({
     toggleTimer,
     skipSection,
     restartSection,
-    exitTimer,
     goBack,
   } = useTimerStore(useShallow(examTimerSelector));
 
@@ -76,7 +77,7 @@ export function ActionButtons({
             <RotateCcw className="mr-2 w-4 h-4" />
             Restart Section
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={exitTimer}>
+          <DropdownMenuItem onClick={onExitRequest}>
             <X className="mr-2 w-4 h-4" />
             Exit Timer
           </DropdownMenuItem>

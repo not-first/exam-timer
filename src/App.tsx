@@ -1,13 +1,23 @@
 import ExamTimer from "@/components/exam-timer";
 import TimerCreationScreen from "@/components/timer-creation";
 import "./index.css";
-import { useTimerStore, TimerStore } from "@/lib/store";
+import { Toaster } from "sonner";
+import {
+  useNavigationStore,
+  NavigationStore,
+} from "@/lib/stores/navigation-store";
+import { useShallow } from "zustand/react/shallow";
 
-const selector = (state: TimerStore) => state.page;
+const selector = (state: NavigationStore) => state.page;
 function App() {
-  const page = useTimerStore(selector);
+  const page = useNavigationStore(useShallow(selector));
 
-  return <>{page === "home" ? <TimerCreationScreen /> : <ExamTimer />}</>;
+  return (
+    <>
+      {page === "home" ? <TimerCreationScreen /> : <ExamTimer />}
+      <Toaster />
+    </>
+  );
 }
 
 export default App;

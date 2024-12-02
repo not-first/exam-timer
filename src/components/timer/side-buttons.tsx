@@ -4,7 +4,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { HelpCircle, Maximize, Minimize } from "lucide-react";
+import { HelpCircle, Maximize, Minimize, Settings } from "lucide-react";
 import { useCallback, useState } from "react";
 
 export function MaximiseMinimiseButton({
@@ -102,6 +102,28 @@ export function ShortcutsButton() {
           </div>
         </PopoverContent>
       </Popover>
+    </div>
+  );
+}
+
+export function SettingsButton() {
+  const [settingsButtonVisible, setSettingsButtonVisible] = useState(false);
+
+  return (
+    <div
+      className="fixed top-0 left-0 w-32 h-32 flex justify-start pt-4 pl-4"
+      onMouseEnter={() => setSettingsButtonVisible(true)}
+      onMouseLeave={() => setSettingsButtonVisible(false)}
+    >
+      <Button
+        variant="ghost"
+        size="icon"
+        className={`transition-opacity duration-300 ${
+          settingsButtonVisible ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <Settings className="h-4 w-4" />
+      </Button>
     </div>
   );
 }

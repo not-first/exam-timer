@@ -2,7 +2,7 @@ import { Progress } from "@/components/ui/progress";
 import { examTimerSelector, useTimerStore } from "@/lib/stores/timer-store";
 import { useCallback, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { ActionButtons } from "./action-buttons";
+import { ActionButtons } from "@/components/timer/action-buttons";
 
 interface TimerDisplayProps {
   showSeconds: boolean;

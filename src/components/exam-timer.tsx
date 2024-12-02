@@ -1,12 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
-import { MaximiseMinimiseButton, ShortcutsButton } from "./timer/side-buttons";
+import { useEffect, useState, useCallback } from "react";
 import { TimerDisplay } from "./timer/timer-display";
-import { examTimerSelector, useTimerStore } from "@/lib/store";
+import { examTimerSelector, useTimerStore } from "@/lib/stores/timer-store";
+import { usePreferencesStore } from "@/lib/stores/preferences-store";
 import { useShallow } from "zustand/react/shallow";
+import { useFullscreen } from "@/hooks/use-fullscreen";
+import { useTimer } from "@/hooks/use-timer";
+import { ExitConfirmation } from "./timer/exit-confirmation";
+import { AppLayout } from "./layouts/app-layout";
 
 export default function ExamTimer() {
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showSeconds, setShowSeconds] = useState(true);
+  const [showExitConfirmation, setShowExitConfirmation] = useState(false);
+  const { showSeconds, setShowSeconds } = usePreferencesStore();
   const {
     currentSection,
     isRunning,
@@ -17,60 +21,12 @@ export default function ExamTimer() {
     goBack,
   } = useTimerStore(useShallow(examTimerSelector));
 
-  const toggleFullscreen = useCallback(() => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
+  const { toggleFullscreen } = useFullscreen();
+  useTimer(isRunning);
+
+  const handleExitRequest = useCallback(() => {
+    setShowExitConfirmation(true);
   }, []);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () =>
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
-
-  useEffect(() => {
-    if (!isRunning) return;
-
-    const interval = setInterval(() => {
-      useTimerStore.setState((state) => {
-        const newTime = state.timerState.timeRemaining - 1;
-        if (newTime < 0) {
-          if (state.timerState.currentSection === "reading") {
-            return {
-              timerState: {
-                ...state.timerState,
-                currentSection: "writing",
-                timeRemaining: state.timerState.writingTime * 60,
-                isRunning: false,
-              },
-            };
-          }
-          return {
-            timerState: {
-              ...state.timerState,
-              currentSection: "completed",
-              timeRemaining: 0,
-              isRunning: false,
-            },
-          };
-        }
-        return {
-          timerState: {
-            ...state.timerState,
-            timeRemaining: newTime,
-          },
-        };
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isRunning]);
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -80,7 +36,8 @@ export default function ExamTimer() {
           toggleTimer();
           break;
         case "Escape":
-          exitTimer();
+          e.preventDefault();
+          handleExitRequest();
           break;
         case "n":
           skipSection();
@@ -112,21 +69,23 @@ export default function ExamTimer() {
     goBack,
     currentSection,
     toggleFullscreen,
+    handleExitRequest,
   ]);
 
   return (
-    <div className="relative min-h-screen">
-      <MaximiseMinimiseButton
-        isFullscreen={isFullscreen}
-        toggleFullscreen={toggleFullscreen}
-      />
+    <AppLayout>
       <div className="flex min-h-screen items-center justify-center font-sans">
         <TimerDisplay
           showSeconds={showSeconds}
           setShowSeconds={setShowSeconds}
+          onExitRequest={handleExitRequest}
         />
       </div>
-      <ShortcutsButton />
-    </div>
+      <ExitConfirmation
+        open={showExitConfirmation}
+        onOpenChange={setShowExitConfirmation}
+        onConfirm={exitTimer}
+      />
+    </AppLayout>
   );
 }
