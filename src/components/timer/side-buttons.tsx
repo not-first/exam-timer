@@ -6,6 +6,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { HelpCircle, Maximize, Minimize, Settings } from "lucide-react";
 import { useCallback, useState } from "react";
+import PreferencesPopover from "@/components/preferences";
 
 export function MaximiseMinimiseButton({
   isFullscreen,
@@ -108,22 +109,39 @@ export function ShortcutsButton() {
 
 export function SettingsButton() {
   const [settingsButtonVisible, setSettingsButtonVisible] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const handleSettingsVisibility = useCallback((isOpen: boolean) => {
+    setIsSettingsOpen(isOpen);
+    if (!isOpen) {
+      setTimeout(() => setSettingsButtonVisible(false), 200);
+    }
+  }, []);
 
   return (
     <div
       className="fixed top-0 left-0 w-32 h-32 flex justify-start pt-4 pl-4"
       onMouseEnter={() => setSettingsButtonVisible(true)}
-      onMouseLeave={() => setSettingsButtonVisible(false)}
+      onMouseLeave={() => !isSettingsOpen && setSettingsButtonVisible(false)}
     >
-      <Button
-        variant="ghost"
-        size="icon"
-        className={`transition-opacity duration-300 ${
-          settingsButtonVisible ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <Settings className="h-4 w-4" />
-      </Button>
+      <Popover onOpenChange={handleSettingsVisibility}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`transition-opacity duration-300 ${
+              settingsButtonVisible || isSettingsOpen
+                ? "opacity-100"
+                : "opacity-0"
+            }`}
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[280px] p-4" align="start" side="bottom">
+          <PreferencesPopover />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
