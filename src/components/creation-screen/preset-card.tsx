@@ -4,24 +4,33 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, GripVertical, X } from "lucide-react";
-import { usePresetStore } from "@/lib/stores/preset-store";
+import { PresetStore, usePresetStore } from "@/lib/stores/preset-store";
+import { useShallow } from "zustand/react/shallow";
 
 interface PresetCardProps {
   preset: ExamPreset;
   isEditing?: boolean;
   isFaded?: boolean;
+  isDisabled?: boolean; // Add this prop
   onEdit: (preset: ExamPreset) => void;
   onCancelEdit?: () => void;
 }
+
+// Add selector
+const selector = (state: PresetStore) => ({
+  deletePreset: state.deletePreset,
+  loadPreset: state.loadPreset,
+});
 
 export function PresetCard({
   preset,
   isEditing,
   isFaded,
+  isDisabled, // Add this prop
   onEdit,
   onCancelEdit,
 }: PresetCardProps) {
-  const { deletePreset, loadPreset } = usePresetStore();
+  const { deletePreset, loadPreset } = usePresetStore(useShallow(selector));
   const {
     attributes,
     listeners,
@@ -37,7 +46,7 @@ export function PresetCard({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : isFaded ? 0.4 : undefined,
+    opacity: isDragging ? 0.5 : isFaded || isDisabled ? 0.4 : undefined,
   };
 
   return (
@@ -46,8 +55,12 @@ export function PresetCard({
       style={style}
       className={`mb-2 transition-colors ${
         isDragging ? "cursor-grabbing" : "cursor-default"
-      } ${isEditing ? "bg-accent" : isFaded ? "" : "hover:bg-accent"}`}
-      onClick={isFaded ? undefined : () => loadPreset(preset.name)}
+      } ${
+        isEditing ? "bg-accent" : isFaded || isDisabled ? "" : "hover:bg-accent"
+      }`}
+      onClick={
+        isFaded || isDisabled ? undefined : () => loadPreset(preset.name)
+      }
     >
       <CardContent className="p-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -72,7 +85,7 @@ export function PresetCard({
           </div>
         </div>
         <div className="flex gap-1">
-          {!isEditing && !isFaded && (
+          {!isEditing && !isFaded && !isDisabled && (
             <Button
               variant="ghost"
               size="sm"
@@ -84,7 +97,7 @@ export function PresetCard({
               <Edit className="h-3 w-3" />
             </Button>
           )}
-          {!isFaded && (
+          {!isFaded && !isDisabled && (
             <Button
               variant="ghost"
               size="sm"

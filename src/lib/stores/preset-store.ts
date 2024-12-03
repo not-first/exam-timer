@@ -19,7 +19,7 @@ export const usePresetStore = create<PresetStore>()(
         return get().presets.find((p) => p.name === presetName);
       },
       addPreset: (preset) => {
-        set((state) => ({ presets: [...state.presets, preset] }));
+        set((state) => ({ presets: [preset, ...state.presets] })); // Changed to prepend
       },
       reorderPresets: (oldIndex, newIndex) => {
         set((state) => {

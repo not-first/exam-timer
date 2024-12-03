@@ -4,7 +4,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { examTimerSelector, useTimerStore } from "@/lib/stores/timer-store";
 import {
@@ -14,21 +13,16 @@ import {
   Play,
   RotateCcw,
   X,
-  ToggleLeft,
   ArrowLeft,
 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 
 interface ActionButtonsProps {
-  showSeconds: boolean;
-  setShowSeconds: (show: boolean) => void;
   buttonsVisible: boolean;
   onExitRequest: () => void;
 }
 
 export function ActionButtons({
-  showSeconds,
-  setShowSeconds,
   buttonsVisible,
   onExitRequest,
 }: ActionButtonsProps) {
@@ -43,7 +37,7 @@ export function ActionButtons({
 
   return (
     <div
-      className={`flex items-center gap-2 transition-opacity duration-300 ${
+      className={`flex items-center gap-2 transition-opacity duration-300 mt-4 ${
         buttonsVisible ? "opacity-100" : "opacity-0"
       }`}
     >
@@ -80,11 +74,6 @@ export function ActionButtons({
           <DropdownMenuItem onClick={onExitRequest}>
             <X className="mr-2 w-4 h-4" />
             Exit Timer
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setShowSeconds(!showSeconds)}>
-            <ToggleLeft className="mr-2 w-4 h-4" />
-            {showSeconds ? "Hide" : "Show"} Seconds
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
