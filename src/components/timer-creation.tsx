@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Save, Check, PenLine } from "lucide-react"; // Add ChevronRight import
+import { Save, Check, PenLine } from "lucide-react";
 import { useTimerStore } from "@/lib/stores/timer-store";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,38 @@ import { TimerStore } from "@/lib/stores/timer-store";
 import { PresetStore } from "@/lib/stores/preset-store";
 import { NavigationStore } from "@/lib/stores/navigation-store";
 import { useShallow } from "zustand/react/shallow";
+import { motion, AnimatePresence } from "motion/react";
+
+const validateTimerInputs = (
+  examName: string,
+  readingTime: string,
+  writingTime: string
+) => {
+  const errors: string[] = [];
+
+  if (!examName.trim()) {
+    errors.push("Exam name is required");
+  } else if (examName.length > 50) {
+    errors.push("Exam name must be 50 characters or less");
+  }
+
+  const readingMins = parseInt(readingTime);
+  const writingMins = parseInt(writingTime);
+
+  if (isNaN(readingMins) || readingMins < 0 || readingMins > 300) {
+    errors.push("Reading time must be between 0-300 minutes");
+  }
+
+  if (isNaN(writingMins) || writingMins < 0 || writingMins > 300) {
+    errors.push("Writing time must be between 0-300 minutes");
+  }
+
+  return errors;
+};
+
+const isInteger = (value: string) => {
+  return /^\d*$/.test(value);
+};
 
 const timerSelector = (state: TimerStore) => ({
   startTimer: state.startTimer,
@@ -50,7 +82,6 @@ const navigationSelector = (state: NavigationStore) => ({
 });
 
 export default function TimerCreationScreen() {
-  // Add state for dropdown value
   const [selectedPreset, setSelectedPreset] = useState<string>("");
   const [examName, setExamName] = useState("");
   const [readingTime, setReadingTime] = useState("");
@@ -69,6 +100,19 @@ export default function TimerCreationScreen() {
   const { setPage } = useNavigationStore(useShallow(navigationSelector));
 
   const handleSavePreset = () => {
+    const validationErrors = validateTimerInputs(
+      examName,
+      readingTime,
+      writingTime
+    );
+
+    if (validationErrors.length > 0) {
+      toast.error("Invalid input", {
+        description: validationErrors.join(". "),
+      });
+      return;
+    }
+
     const existingPreset = presets.find(
       (p) => p.name === examName && p.name !== editingPreset
     );
@@ -101,11 +145,22 @@ export default function TimerCreationScreen() {
   };
 
   const handleStartTimer = () => {
-    // First start the timer
+    const validationErrors = validateTimerInputs(
+      examName,
+      readingTime,
+      writingTime
+    );
+
+    if (validationErrors.length > 0) {
+      toast.error("Invalid input", {
+        description: validationErrors.join(". "),
+      });
+      return;
+    }
+
     const timerName = isPresetLoaded ? selectedPreset : examName;
     startTimer(timerName, parseInt(readingTime), parseInt(writingTime));
 
-    // Then explicitly navigate using a slight delay to ensure timer is set
     setTimeout(() => {
       setPage("timer");
     }, 0);
@@ -162,55 +217,91 @@ export default function TimerCreationScreen() {
     }
   };
 
+  const handleReadingTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (isInteger(value) || value === "") {
+      setReadingTime(value);
+    }
+  };
+
+  const handleWritingTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (isInteger(value) || value === "") {
+      setWritingTime(value);
+    }
+  };
+
   return (
     <AppLayout>
       <div className="flex h-screen items-center justify-center font-sans">
         <div className="flex">
-          {/* Form */}
           <div className="w-[350px] bg-background p-6">
-            {/* Form inputs with reduced spacing */}
             <div className="space-y-3">
-              {" "}
-              {/* Reduced from space-y-4 */}
               <div className="space-y-1.5">
-                {" "}
-                {/* Reduced from space-y-2 */}
                 <Label htmlFor="examName">Exam Name</Label>
                 <Input
                   id="examName"
                   value={examName}
-                  onChange={(e) => setExamName(e.target.value)}
+                  onChange={(e) => setExamName(e.target.value.slice(0, 50))}
                   disabled={isPresetLoaded}
+                  maxLength={50}
+                  placeholder="Enter exam name"
                 />
+                <AnimatePresence mode="sync">
+                  {examName.length > 45 && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{
+                        height: { duration: 0.2 },
+                        opacity: { duration: 0.2 },
+                      }}
+                    >
+                      <p className="text-xs text-muted-foreground">
+                        {50 - examName.length} characters remaining
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
               <div className="space-y-1.5">
-                {" "}
-                {/* Reduced from space-y-2 */}
                 <Label htmlFor="readingTime">Reading Time (minutes)</Label>
                 <Input
                   id="readingTime"
+                  type="number"
+                  min={0}
+                  max={300}
                   value={readingTime}
-                  onChange={(e) => setReadingTime(e.target.value)}
+                  onChange={handleReadingTimeChange}
                   disabled={isPresetLoaded}
                   placeholder="Enter reading time"
+                  onKeyDown={(e) => {
+                    if (e.key === "." || e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </div>
               <div className="space-y-1.5">
-                {" "}
-                {/* Reduced from space-y-2 */}
                 <Label htmlFor="writingTime">Writing Time (minutes)</Label>
                 <Input
                   id="writingTime"
+                  type="number"
+                  min={0}
+                  max={300}
                   value={writingTime}
-                  onChange={(e) => setWritingTime(e.target.value)}
+                  onChange={handleWritingTimeChange}
                   disabled={isPresetLoaded}
                   placeholder="Enter writing time"
+                  onKeyDown={(e) => {
+                    if (e.key === "." || e.key === "-" || e.key === "e") {
+                      e.preventDefault();
+                    }
+                  }}
                 />
               </div>
-              {/* Buttons with reduced top margin */}
               <div className="flex items-center gap-2 pt-2">
-                {" "}
-                {/* Reduced from mt-6 */}
                 <Button
                   className="flex-1"
                   onClick={handleStartTimer}
@@ -286,7 +377,6 @@ export default function TimerCreationScreen() {
             </div>
           </div>
 
-          {/* Separator */}
           {presetListShown && (
             <div
               className="w-[20px] flex items-stretch cursor-pointer hover:bg-muted/50 py-3 rounded-lg"
@@ -299,12 +389,11 @@ export default function TimerCreationScreen() {
             </div>
           )}
 
-          {/* Preset List - adjust to match form height */}
           {presetListShown && (
             <div className="w-[400px] bg-background p-6">
               <PresetList
                 editingPreset={editingPreset}
-                isDisabled={isPresetLoaded}  // Add this prop
+                isDisabled={isPresetLoaded}
                 onEdit={handleEditPreset}
                 onCancelEdit={handleCancelEdit}
               />
@@ -313,7 +402,6 @@ export default function TimerCreationScreen() {
         </div>
       </div>
 
-      {/* Alert Dialog */}
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

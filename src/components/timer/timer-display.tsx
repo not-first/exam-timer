@@ -38,7 +38,6 @@ export function TimerDisplay({ onExitRequest }: TimerDisplayProps) {
     }
   }, [isRunning, alwaysShowActions]);
 
-  // Add effect to handle preference changes
   useEffect(() => {
     if (!alwaysShowActions && isRunning) {
       setButtonsVisible(false);
@@ -76,7 +75,6 @@ export function TimerDisplay({ onExitRequest }: TimerDisplayProps) {
     );
   }
 
-  // Wider range for timer size (0.7-1.3) while keeping 50 as the midpoint
   const sizeMultiplier = 0.7 + (timerSize / 100) * 0.6;
 
   const totalTime =

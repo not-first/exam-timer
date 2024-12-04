@@ -29,14 +29,14 @@ const selector = (state: PresetStore) => ({
 
 interface PresetListProps {
   editingPreset: string | null;
-  isDisabled?: boolean; // Add this prop
+  isDisabled?: boolean;
   onEdit: (preset: ExamPreset) => void;
   onCancelEdit: () => void;
 }
 
 export function PresetList({
   editingPreset,
-  isDisabled, // Add this prop
+  isDisabled,
   onEdit,
   onCancelEdit,
 }: PresetListProps) {
@@ -48,19 +48,16 @@ export function PresetList({
   );
   const [isDragging, setIsDragging] = useState(false);
 
-  // Track the previous presets length to detect only new additions
   const prevPresetsLengthRef = useRef(presets.length);
   useEffect(() => {
-    // Only look for new presets when the array length increases
     if (presets.length > prevPresetsLengthRef.current) {
-      const newPreset = presets[0]; // Since we prepend new presets
+      const newPreset = presets[0];
       setNewlyCreatedPreset(newPreset.name);
       setTimeout(() => setNewlyCreatedPreset(null), 1000);
     }
     prevPresetsLengthRef.current = presets.length;
   }, [presets]);
 
-  // Modify sensor to prevent dragging during edit mode
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {

@@ -75,8 +75,8 @@ export const useTimerStore = create<TimerStore>()((set, get) => ({
         ...state.timerState,
         timeRemaining:
           state.timerState.currentSection === "reading"
-            ? state.timerState.readingTime * 60
-            : state.timerState.writingTime * 60,
+            ? Math.round(state.timerState.readingTime * 60)
+            : Math.round(state.timerState.writingTime * 60),
         isRunning: false,
       },
     }));
@@ -84,16 +84,7 @@ export const useTimerStore = create<TimerStore>()((set, get) => ({
   toggleTimer: () => {
     const currentSection = get().timerState.currentSection;
     if (currentSection === "completed") {
-      set({
-        timerState: {
-          currentSection: "reading",
-          timeRemaining: 0,
-          isRunning: false,
-          examName: "",
-          readingTime: 0,
-          writingTime: 0,
-        },
-      });
+      get().exitTimer();
     } else {
       set((state) => ({
         timerState: {

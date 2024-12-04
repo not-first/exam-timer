@@ -11,12 +11,11 @@ interface PresetCardProps {
   preset: ExamPreset;
   isEditing?: boolean;
   isFaded?: boolean;
-  isDisabled?: boolean; // Add this prop
+  isDisabled?: boolean;
   onEdit: (preset: ExamPreset) => void;
   onCancelEdit?: () => void;
 }
 
-// Add selector
 const selector = (state: PresetStore) => ({
   deletePreset: state.deletePreset,
   loadPreset: state.loadPreset,
@@ -26,7 +25,7 @@ export function PresetCard({
   preset,
   isEditing,
   isFaded,
-  isDisabled, // Add this prop
+  isDisabled,
   onEdit,
   onCancelEdit,
 }: PresetCardProps) {

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 type TimerSize = number;
-type ThemeMode = "light" | "dark"; // Remove "system"
+type ThemeMode = "light" | "dark";
 
 export interface PreferencesStore {
   showSeconds: boolean;
@@ -24,7 +24,7 @@ export const usePreferencesStore = create<PreferencesStore>()(
   persist(
     (set) => ({
       showSeconds: false,
-      themeMode: "light", // Default to light instead of system
+      themeMode: "light",
       showProgressBar: true,
       alwaysShowIcons: true,
       timerSize: 50,
