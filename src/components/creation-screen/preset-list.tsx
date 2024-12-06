@@ -61,7 +61,7 @@ export function PresetList({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: editingPreset ? Infinity : 0,
+        distance: 8, // Set a small threshold for drag activation
       },
     })
   );
@@ -140,8 +140,8 @@ export function PresetList({
           }`}
         />
       </div>
-      <ScrollArea className="h-80 w-full">
-        <div className="pr-4">
+      <ScrollArea className="h-80 w-full [&>div]:border-none">
+        <div>
           <div ref={topSentinelRef} className="h-[1px] w-full" />
           <DndContext
             sensors={sensors}
@@ -163,26 +163,22 @@ export function PresetList({
                         isMounted &&
                         (preset.name === newlyCreatedPreset ||
                           presets.length === 1)
-                          ? { height: 0, opacity: 0, scale: 0.95 }
+                          ? { opacity: 0, scale: 0.95 } // Removed height: 0
                           : false
                       }
                       animate={{
-                        height: "auto",
                         opacity: 1,
                         scale: 1,
                         transition: {
                           type: "spring",
-                          stiffness: 500,
-                          damping: 30,
-                          mass: 1,
-                          height: { duration: 0.15 },
-                          opacity: { duration: 0.1 },
+                          stiffness: 100,
+                          damping: 1,
+                          mass: 150,
                         },
                       }}
                       exit={
                         !isDragging
                           ? {
-                              height: 0,
                               opacity: 0,
                               scale: 0.95,
                               transition: {
@@ -192,7 +188,10 @@ export function PresetList({
                             }
                           : undefined
                       }
-                      style={{ position: "relative" }}
+                      style={{
+                        position: isDragging ? "relative" : undefined,
+                        zIndex: isDragging ? 50 : undefined,
+                      }}
                     >
                       <PresetCard
                         preset={preset}
@@ -224,14 +223,26 @@ export function PresetList({
               </SortableContext>
             </div>
 
-            <DragOverlay>
+            <DragOverlay
+              dropAnimation={{
+                duration: 200,
+                easing: "ease",
+              }}
+            >
               {activePreset ? (
-                <PresetCard
-                  preset={activePreset}
-                  onEdit={() => {}}
-                  isEditing={false}
-                  isFaded={false}
-                />
+                <div
+                  style={{
+                    transform: "rotate(2deg)",
+                    cursor: "grabbing",
+                  }}
+                >
+                  <PresetCard
+                    preset={activePreset}
+                    onEdit={() => {}}
+                    isEditing={false}
+                    isFaded={false}
+                  />
+                </div>
               ) : null}
             </DragOverlay>
           </DndContext>

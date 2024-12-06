@@ -234,8 +234,24 @@ export default function TimerCreationScreen() {
   return (
     <AppLayout>
       <div className="flex h-screen items-center justify-center font-sans">
-        <div className="flex">
-          <div className="w-[350px] bg-background p-6">
+        <div
+          className="flex relative overflow-hidden bg-background transition-all duration-500 ease-in-out"
+          style={{
+            width: presetListShown ? "770px" : "350px",
+            marginLeft: presetListShown ? "-20px" : "0px",
+          }}
+        >
+          <motion.div
+            animate={{
+              x: presetListShown ? -20 : 0,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 150,
+              damping: 25,
+            }}
+            className="w-[350px] bg-background p-6 relative z-20"
+          >
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <Label htmlFor="examName">Exam Name</Label>
@@ -375,30 +391,53 @@ export default function TimerCreationScreen() {
                 </Select>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {presetListShown && (
-            <div
-              className="w-[20px] flex items-stretch cursor-pointer hover:bg-muted/50 py-3 rounded-lg"
-              onClick={() => setPresetListShown(false)}
-            >
-              <Separator
-                orientation="vertical"
-                className="mx-auto bg-border/80"
-              />
-            </div>
-          )}
+          <AnimatePresence mode="sync">
+            {presetListShown && (
+              <>
+                <motion.div
+                  className="absolute inset-y-6 cursor-pointer hover:bg-muted/50 w-[20px] z-30 bg-background"
+                  style={{ left: "350px" }}
+                  animate={{
+                    x: presetListShown ? -20 : 0,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 150,
+                    damping: 25,
+                  }}
+                  onClick={() => setPresetListShown(false)}
+                >
+                  <Separator
+                    orientation="vertical"
+                    className="h-full mx-auto"
+                  />
+                </motion.div>
 
-          {presetListShown && (
-            <div className="w-[400px] bg-background p-6">
-              <PresetList
-                editingPreset={editingPreset}
-                isDisabled={isPresetLoaded}
-                onEdit={handleEditPreset}
-                onCancelEdit={handleCancelEdit}
-              />
-            </div>
-          )}
+                <motion.div
+                  initial={{ x: -350 }}
+                  animate={{ x: 350 }}
+                  exit={{ x: -350 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 200, // Higher stiffness for faster initial movement
+                    damping: 20, // Lower damping for more bounce
+                    mass: 1, // Lower mass for lighter feel
+                    restDelta: 0.5, // Makes it settle more quickly
+                  }}
+                  className="absolute left-0 w-[400px] bg-background p-6 z-10"
+                >
+                  <PresetList
+                    editingPreset={editingPreset}
+                    isDisabled={isPresetLoaded}
+                    onEdit={handleEditPreset}
+                    onCancelEdit={handleCancelEdit}
+                  />
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
