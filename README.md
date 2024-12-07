@@ -41,7 +41,9 @@ Utilise the right action button to take multiple actions such as skipping to the
 Timer results will be show in the tab title when it is in the background.
 ---
 ### Examples
-https://github.com/user-attachments/assets/60809f64-72c8-4664-9a8e-4fcbbf325152
+
+https://github.com/user-attachments/assets/f371e43f-4c01-475b-8ee0-590f4b83387e
+![timer-usage-example](https://github.com/user-attachments/assets/796829ca-b3a6-4061-88a2-6d0d7f73a209)
 
 
 ![output_trimmed_enhanced_reduced](https://github.com/user-attachments/assets/e72a2206-69ab-468b-98d7-a6d95f08d67c)
