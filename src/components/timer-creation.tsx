@@ -140,7 +140,6 @@ export default function TimerCreationScreen() {
       });
     }
 
-    // Reset form after successful save
     setExamName("");
     setReadingTime("");
     setWritingTime("");
@@ -247,12 +246,12 @@ export default function TimerCreationScreen() {
           className="flex relative overflow-hidden bg-background transition-[width] duration-500 ease-in-out"
           style={{
             width: presetListShown ? "770px" : "350px",
-            marginLeft: presetListShown ? "0px" : "0px", // Changed from -20px to 0px
+            marginLeft: presetListShown ? "0px" : "0px",
           }}
         >
           <motion.div
             animate={{
-              x: presetListShown ? -5 : 0, // Changed from -10 to -5
+              x: presetListShown ? -5 : 0,
             }}
             transition={{
               type: "spring",
@@ -422,8 +421,8 @@ export default function TimerCreationScreen() {
                     x: 0,
                     opacity: 0,
                     transition: {
-                      duration: 0.15, // Quick fade out
-                      opacity: { duration: 0.1 }, // Even quicker opacity fade
+                      duration: 0.15,
+                      opacity: { duration: 0.1 },
                     },
                   }}
                   transition={{
@@ -441,14 +440,14 @@ export default function TimerCreationScreen() {
 
                 <motion.div
                   initial={{ x: -340 }}
-                  animate={{ x: 340 }} // Changed from 350 to 365
+                  animate={{ x: 340 }}
                   exit={{ x: -340 }}
                   transition={{
                     type: "spring",
-                    stiffness: 200, // Higher stiffness for faster initial movement
-                    damping: 20, // Lower damping for more bounce
-                    mass: 0.7, // Lower mass for lighter feel
-                    restDelta: 0.5, // Makes it settle more quickly
+                    stiffness: 200,
+                    damping: 20,
+                    mass: 0.7,
+                    restDelta: 0.5,
                   }}
                   className="absolute left-0 w-[400px] bg-background p-6 z-10"
                 >
