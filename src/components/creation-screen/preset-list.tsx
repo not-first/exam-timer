@@ -7,6 +7,7 @@ import {
   useSensor,
   useSensors,
   PointerSensor,
+  MeasuringStrategy,
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { DragOverlay } from "@dnd-kit/core";
@@ -47,6 +48,8 @@ export function PresetList({
     null
   );
   const [isDragging, setIsDragging] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const prevPresetsLengthRef = useRef(presets.length);
   useEffect(() => {
@@ -61,7 +64,9 @@ export function PresetList({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Set a small threshold for drag activation
+        distance: 8, // Increased from 3
+        tolerance: 5,
+        delay: 0, // Removed delay
       },
     })
   );
@@ -103,23 +108,60 @@ export function PresetList({
     };
   }, []);
 
+  useEffect(() => {
+    const scrollArea = scrollAreaRef.current?.querySelector(
+      "[data-radix-scroll-area-viewport]"
+    );
+    if (!scrollArea) return;
+
+    const handleScroll = () => {
+      setHasScrolled(scrollArea.scrollTop > 0);
+    };
+
+    scrollArea.addEventListener("scroll", handleScroll);
+    return () => scrollArea.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleDragStart = (event: DragStartEvent) => {
-    if (editingPreset) return;
-    setActiveId(event.active.id as string);
+    const { active } = event;
+    console.log("🔵 Drag Start:", {
+      active,
+      editingPreset,
+      isDisabled,
+    });
+
+    if (editingPreset || isDisabled) {
+      console.log("❌ Drag cancelled - editing or disabled");
+      return;
+    }
+    setActiveId(active.id as string);
     setIsDragging(true);
+    document.body.style.cursor = "grabbing";
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveId(null);
-    setIsDragging(false);
     const { active, over } = event;
+    console.log("🟡 Drag End:", { active, over });
 
-    if (!over || active.id === over.id) return;
+    document.body.style.cursor = "";
+
+    if (!over || active.id === over.id) {
+      console.log("❌ Drag cancelled - no target or same position");
+      setActiveId(null);
+      setIsDragging(false);
+      return;
+    }
 
     const oldIndex = presets.findIndex((p) => p.name === active.id);
     const newIndex = presets.findIndex((p) => p.name === over.id);
+    console.log("📍 Reordering:", { oldIndex, newIndex });
 
-    reorderPresets(oldIndex, newIndex);
+    if (oldIndex !== -1 && newIndex !== -1) {
+      reorderPresets(oldIndex, newIndex);
+    }
+
+    setActiveId(null);
+    setIsDragging(false);
   };
 
   const activePreset = activeId
@@ -131,7 +173,7 @@ export function PresetList({
       <div className="pointer-events-none absolute inset-x-0 h-80 z-10">
         <div
           className={`absolute top-0 h-8 w-full bg-gradient-to-b from-background to-transparent transition-opacity duration-200 ${
-            isAtTop ? "opacity-0" : "opacity-100"
+            isAtTop || !hasScrolled ? "opacity-0" : "opacity-100"
           }`}
         />
         <div
@@ -140,7 +182,10 @@ export function PresetList({
           }`}
         />
       </div>
-      <ScrollArea className="h-80 w-full [&>div]:border-none">
+      <ScrollArea
+        ref={scrollAreaRef}
+        className="h-80 w-full [&>div]:border-none"
+      >
         <div>
           <div ref={topSentinelRef} className="h-[1px] w-full" />
           <DndContext
@@ -148,6 +193,11 @@ export function PresetList({
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             modifiers={[restrictToVerticalAxis]}
+            measuring={{
+              droppable: {
+                strategy: MeasuringStrategy.Always,
+              },
+            }}
           >
             <div className="relative">
               <SortableContext
@@ -159,38 +209,10 @@ export function PresetList({
                     <motion.div
                       key={preset.name}
                       layout={!isDragging}
-                      initial={
-                        isMounted &&
-                        (preset.name === newlyCreatedPreset ||
-                          presets.length === 1)
-                          ? { opacity: 0, scale: 0.95 } // Removed height: 0
-                          : false
-                      }
-                      animate={{
-                        opacity: 1,
-                        scale: 1,
-                        transition: {
-                          type: "spring",
-                          stiffness: 100,
-                          damping: 1,
-                          mass: 150,
-                        },
-                      }}
-                      exit={
-                        !isDragging
-                          ? {
-                              opacity: 0,
-                              scale: 0.95,
-                              transition: {
-                                duration: 0.15,
-                                ease: "easeInOut",
-                              },
-                            }
-                          : undefined
-                      }
-                      style={{
-                        position: isDragging ? "relative" : undefined,
-                        zIndex: isDragging ? 50 : undefined,
+                      transition={{
+                        duration: isDragging ? 0 : 0.2,
+                        type: "spring",
+                        bounce: 0.2,
                       }}
                     >
                       <PresetCard
@@ -209,7 +231,7 @@ export function PresetList({
                     <motion.div
                       key="empty-state"
                       initial={false}
-                      exit={{ height: 0, opacity: 0 }}
+                      exit={{ opacity: 0 }}
                       transition={{ duration: 0.2 }}
                     >
                       <Card className="mb-2 border-dashed">
@@ -221,30 +243,21 @@ export function PresetList({
                   )}
                 </AnimatePresence>
               </SortableContext>
-            </div>
 
-            <DragOverlay
-              dropAnimation={{
-                duration: 200,
-                easing: "ease",
-              }}
-            >
-              {activePreset ? (
-                <div
-                  style={{
-                    transform: "rotate(2deg)",
-                    cursor: "grabbing",
-                  }}
-                >
-                  <PresetCard
-                    preset={activePreset}
-                    onEdit={() => {}}
-                    isEditing={false}
-                    isFaded={false}
-                  />
-                </div>
-              ) : null}
-            </DragOverlay>
+              <DragOverlay>
+                {activeId && activePreset ? (
+                  <div style={{ width: "100%" }}>
+                    <PresetCard
+                      preset={activePreset}
+                      onEdit={() => {}}
+                      onCancelEdit={() => {}}
+                      isEditing={false}
+                      isFaded={false}
+                    />
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </div>
           </DndContext>
           <div ref={bottomSentinelRef} className="h-[1px] w-full" />
         </div>

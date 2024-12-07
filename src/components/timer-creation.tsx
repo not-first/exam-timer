@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Save, Check, PenLine } from "lucide-react";
 import { useTimerStore } from "@/lib/stores/timer-store";
@@ -92,12 +92,24 @@ export default function TimerCreationScreen() {
   const [originalPreset, setOriginalPreset] = useState<ExamPreset | null>(null);
   const [presetListShown, setPresetListShown] = useState(true);
   const [isPresetLoaded, setIsPresetLoaded] = useState(false);
+  const [isDuplicateName, setIsDuplicateName] = useState(false);
 
   const { startTimer } = useTimerStore(useShallow(timerSelector));
   const { presets, addPreset, loadPreset, updatePreset } = usePresetStore(
     useShallow(presetSelector)
   );
   const { setPage } = useNavigationStore(useShallow(navigationSelector));
+
+  useEffect(() => {
+    if (!examName || examName === editingPreset) {
+      setIsDuplicateName(false);
+      return;
+    }
+    const duplicateExists = presets.some(
+      (p) => p.name === examName && p.name !== editingPreset
+    );
+    setIsDuplicateName(duplicateExists);
+  }, [examName, presets, editingPreset]);
 
   const handleSavePreset = () => {
     const validationErrors = validateTimerInputs(
@@ -110,17 +122,6 @@ export default function TimerCreationScreen() {
       toast.error("Invalid input", {
         description: validationErrors.join(". "),
       });
-      return;
-    }
-
-    const existingPreset = presets.find(
-      (p) => p.name === examName && p.name !== editingPreset
-    );
-
-    if (existingPreset) {
-      toast.info(
-        "A preset with this name already exists. Please choose a unique name."
-      );
       return;
     }
 
@@ -235,15 +236,15 @@ export default function TimerCreationScreen() {
     <AppLayout>
       <div className="flex h-screen items-center justify-center font-sans">
         <div
-          className="flex relative overflow-hidden bg-background transition-all duration-500 ease-in-out"
+          className="flex relative overflow-hidden bg-background transition-[width] duration-500 ease-in-out"
           style={{
             width: presetListShown ? "770px" : "350px",
-            marginLeft: presetListShown ? "-20px" : "0px",
+            marginLeft: presetListShown ? "0px" : "0px", // Changed from -20px to 0px
           }}
         >
           <motion.div
             animate={{
-              x: presetListShown ? -20 : 0,
+              x: presetListShown ? -5 : 0, // Changed from -10 to -5
             }}
             transition={{
               type: "spring",
@@ -264,7 +265,7 @@ export default function TimerCreationScreen() {
                   placeholder="Enter exam name"
                 />
                 <AnimatePresence mode="sync">
-                  {examName.length > 45 && (
+                  {(examName.length > 45 || isDuplicateName) && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
@@ -274,9 +275,15 @@ export default function TimerCreationScreen() {
                         opacity: { duration: 0.2 },
                       }}
                     >
-                      <p className="text-xs text-muted-foreground">
-                        {50 - examName.length} characters remaining
-                      </p>
+                      {isDuplicateName ? (
+                        <p className="text-xs text-destructive">
+                          A preset with this name already exists
+                        </p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">
+                          {50 - examName.length} characters remaining
+                        </p>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -325,7 +332,8 @@ export default function TimerCreationScreen() {
                     !examName ||
                     !readingTime ||
                     !writingTime ||
-                    Boolean(editingPreset)
+                    Boolean(editingPreset) ||
+                    isDuplicateName
                   }
                 >
                   Start Timer
@@ -339,7 +347,8 @@ export default function TimerCreationScreen() {
                       !examName ||
                       !readingTime ||
                       !writingTime ||
-                      isPresetLoaded
+                      isPresetLoaded ||
+                      isDuplicateName
                     }
                     className={`absolute inset-0 transition-opacity duration-300 ${
                       saveSuccess
@@ -399,8 +408,15 @@ export default function TimerCreationScreen() {
                 <motion.div
                   className="absolute inset-y-6 cursor-pointer hover:bg-muted/50 w-[20px] z-30 bg-background"
                   style={{ left: "350px" }}
-                  animate={{
-                    x: presetListShown ? -20 : 0,
+                  animate={{ x: -20 }}
+                  initial={{ x: 0 }}
+                  exit={{
+                    x: 0,
+                    opacity: 0,
+                    transition: {
+                      duration: 0.15, // Quick fade out
+                      opacity: { duration: 0.1 }, // Even quicker opacity fade
+                    },
                   }}
                   transition={{
                     type: "spring",
@@ -416,14 +432,14 @@ export default function TimerCreationScreen() {
                 </motion.div>
 
                 <motion.div
-                  initial={{ x: -350 }}
-                  animate={{ x: 350 }}
-                  exit={{ x: -350 }}
+                  initial={{ x: -340 }}
+                  animate={{ x: 340 }} // Changed from 350 to 365
+                  exit={{ x: -340 }}
                   transition={{
                     type: "spring",
                     stiffness: 200, // Higher stiffness for faster initial movement
                     damping: 20, // Lower damping for more bounce
-                    mass: 1, // Lower mass for lighter feel
+                    mass: 0.7, // Lower mass for lighter feel
                     restDelta: 0.5, // Makes it settle more quickly
                   }}
                   className="absolute left-0 w-[400px] bg-background p-6 z-10"

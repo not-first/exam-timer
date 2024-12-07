@@ -29,7 +29,7 @@ export function PresetCard({
   onEdit,
   onCancelEdit,
 }: PresetCardProps) {
-  const { deletePreset, loadPreset } = usePresetStore(useShallow(selector));
+  const { deletePreset } = usePresetStore(useShallow(selector));
   const {
     attributes,
     listeners,
@@ -39,42 +39,52 @@ export function PresetCard({
     isDragging,
   } = useSortable({
     id: preset.name,
-    disabled: isEditing || isFaded,
+    disabled: isEditing || isFaded || isDisabled,
   });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : isFaded || isDisabled ? 0.4 : undefined,
-  };
+  console.log("🎯 PresetCard Render:", {
+    name: preset.name,
+    isDragging,
+    isDisabled: isEditing || isFaded || isDisabled,
+    hasListeners: !!listeners,
+    transform,
+  });
+
+  const style = transform
+    ? {
+        transform: CSS.Transform.toString(transform),
+        transition: transition || undefined,
+        zIndex: isDragging ? 50 : undefined,
+        position: isDragging ? "relative" : undefined,
+      }
+    : undefined;
 
   return (
     <Card
       ref={setNodeRef}
       style={style}
-      className={`mb-2 transition-colors ${
-        isDragging ? "cursor-grabbing" : "cursor-default"
-      } ${
-        isEditing ? "bg-accent" : isFaded || isDisabled ? "" : "hover:bg-accent"
-      }`}
-      onClick={
-        isFaded || isDisabled ? undefined : () => loadPreset(preset.name)
-      }
+      className={`mb-2 select-none ${
+        isEditing ? "bg-accent" : isFaded || isDisabled ? "opacity-40" : ""
+      } ${isDragging ? "opacity-75" : ""}`}
     >
       <CardContent className="p-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-4 transition-opacity duration-200">
-            {!isEditing && !isFaded ? (
-              <button
-                {...attributes}
-                {...listeners}
-                className={`${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-              >
-                <GripVertical className="h-4 w-4 text-gray-400" />
-              </button>
-            ) : (
-              <GripVertical className="h-4 w-4 text-gray-400 opacity-30" />
-            )}
+          <div
+            {...attributes}
+            {...listeners}
+            className={`w-4 touch-none ${
+              isEditing || isFaded || isDisabled
+                ? "cursor-default"
+                : "cursor-grab"
+            } ${isDragging ? "cursor-grabbing" : ""}`}
+          >
+            <GripVertical
+              className={`h-4 w-4 ${
+                isEditing || isFaded || isDisabled
+                  ? "text-gray-400/30"
+                  : "text-gray-400"
+              }`}
+            />
           </div>
           <div>
             <h3 className="text-sm font-medium select-none">{preset.name}</h3>
