@@ -101,7 +101,7 @@ export default function TimerCreationScreen() {
   const { setPage } = useNavigationStore(useShallow(navigationSelector));
 
   useEffect(() => {
-    if (!examName || examName === editingPreset) {
+    if (!examName || examName === editingPreset || isPresetLoaded) {
       setIsDuplicateName(false);
       return;
     }
@@ -109,7 +109,7 @@ export default function TimerCreationScreen() {
       (p) => p.name === examName && p.name !== editingPreset
     );
     setIsDuplicateName(duplicateExists);
-  }, [examName, presets, editingPreset]);
+  }, [examName, presets, editingPreset, isPresetLoaded]);
 
   const handleSavePreset = () => {
     const validationErrors = validateTimerInputs(

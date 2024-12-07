@@ -1,6 +1,8 @@
-# Simple Exam Timer
+# Minimalist Exam Timer
 
-A simple exam timer. Made with shadcn ui. Minimalist, simple UI with smooth animations.
+A exam timer. Made with shadcn ui. Minimalist, simple UI with smooth animations.
+Supports reading time and writing time, as well as saving exam presets.
+Many preferences available such as light/dark mode and toggleable progress bar, which persist across tab sessions.
 
 On the main screen, the exam name as well as reading and writing time can be entered.
 

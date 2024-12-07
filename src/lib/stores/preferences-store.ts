@@ -21,7 +21,7 @@ export interface PreferencesStore {
 }
 
 export const usePreferencesStore = create<PreferencesStore>()(
-  // @ts-expect-error Zustand persist middleware typing issue
+  // @ts-ignore Zustand persist middleware typing issue
   persist(
     (set) => ({
       showSeconds: false,
