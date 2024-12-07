@@ -35,6 +35,7 @@ export interface PresetStore {
 }
 
 export const usePresetStore = create<PresetStore>()(
+  // @ts-expect-error Zustand persist middleware typing issue
   persist<PresetStore>(
     (set, get) => ({
       presets: DEFAULT_PRESETS,
