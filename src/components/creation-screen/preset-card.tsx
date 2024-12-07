@@ -14,6 +14,8 @@ interface PresetCardProps {
   isDisabled?: boolean;
   onEdit: (preset: ExamPreset) => void;
   onCancelEdit?: () => void;
+  isDragOverlay?: boolean;
+  isNew?: boolean;
 }
 
 const selector = (state: PresetStore) => ({
@@ -28,55 +30,38 @@ export function PresetCard({
   isDisabled,
   onEdit,
   onCancelEdit,
+  isNew,
 }: PresetCardProps) {
   const { deletePreset } = usePresetStore(useShallow(selector));
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: preset.name,
+      disabled: isEditing || isFaded || isDisabled,
+    });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
     transition,
-    isDragging,
-  } = useSortable({
-    id: preset.name,
-    disabled: isEditing || isFaded || isDisabled,
-  });
-
-  console.log("🎯 PresetCard Render:", {
-    name: preset.name,
-    isDragging,
-    isDisabled: isEditing || isFaded || isDisabled,
-    hasListeners: !!listeners,
-    transform,
-  });
-
-  const style = transform
-    ? {
-        transform: CSS.Transform.toString(transform),
-        transition: transition || undefined,
-        zIndex: isDragging ? 50 : undefined,
-        position: isDragging ? "relative" : undefined,
-      }
-    : undefined;
+  };
 
   return (
     <Card
       ref={setNodeRef}
       style={style}
-      className={`mb-2 select-none ${
+      className={`mb-2 ${
         isEditing ? "bg-accent" : isFaded || isDisabled ? "opacity-40" : ""
-      } ${isDragging ? "opacity-75" : ""}`}
+      } ${isNew ? "animate-highlight" : ""}`}
     >
       <CardContent className="p-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div
             {...attributes}
             {...listeners}
-            className={`w-4 touch-none ${
+            className={`w-4 touch-none select-none ${
               isEditing || isFaded || isDisabled
                 ? "cursor-default"
-                : "cursor-grab"
-            } ${isDragging ? "cursor-grabbing" : ""}`}
+                : "cursor-grab active:cursor-grabbing"
+            }`}
           >
             <GripVertical
               className={`h-4 w-4 ${

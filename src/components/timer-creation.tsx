@@ -139,6 +139,14 @@ export default function TimerCreationScreen() {
         writingTime: parseInt(writingTime),
       });
     }
+
+    // Reset form after successful save
+    setExamName("");
+    setReadingTime("");
+    setWritingTime("");
+    setSelectedPreset("");
+    setIsPresetLoaded(false);
+
     setSaveSuccess(true);
     setTimeout(() => {
       setSaveSuccess(false);

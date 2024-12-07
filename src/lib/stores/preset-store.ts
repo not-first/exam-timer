@@ -2,6 +2,29 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { ExamPreset } from "../types";
 
+const DEFAULT_PRESETS: ExamPreset[] = [
+  {
+    name: "Mathematics",
+    readingTime: 10,
+    writingTime: 90,
+  },
+  {
+    name: "English",
+    readingTime: 15,
+    writingTime: 120,
+  },
+  {
+    name: "Chemistry",
+    readingTime: 10,
+    writingTime: 105,
+  },
+  {
+    name: "Biology",
+    readingTime: 15,
+    writingTime: 75,
+  },
+];
+
 export interface PresetStore {
   presets: ExamPreset[];
   loadPreset: (presetName: string) => ExamPreset | undefined;
@@ -12,9 +35,9 @@ export interface PresetStore {
 }
 
 export const usePresetStore = create<PresetStore>()(
-  persist(
+  persist<PresetStore>(
     (set, get) => ({
-      presets: [],
+      presets: DEFAULT_PRESETS,
       loadPreset: (presetName) => {
         return get().presets.find((p) => p.name === presetName);
       },
