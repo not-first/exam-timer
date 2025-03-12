@@ -6,8 +6,6 @@ Many preferences available such as light/dark mode and toggleable progress bar, 
 
 _Initially created due to the absence of a satisfying product. In order to effectively study for future exams, I created this tool and populated it will all the features I would need._
 
-**View screenshots, gifs and videos at the bottom of this file.**
-
 ## Timer Creation
 On the main screen, the exam name as well as reading and writing time can be entered.
 Press the 'Start Timer' button to start a timer with the entered information.
@@ -42,18 +40,7 @@ Timer results will be show in the tab title when it is in the background.
 ---
 ### Examples
 
-https://github.com/user-attachments/assets/f371e43f-4c01-475b-8ee0-590f4b83387e
+
 ![timer-usage-example](https://github.com/user-attachments/assets/796829ca-b3a6-4061-88a2-6d0d7f73a209)
 
-
-![output_trimmed_enhanced_reduced](https://github.com/user-attachments/assets/e72a2206-69ab-468b-98d7-a6d95f08d67c)
-![Screenshot 2024-12-07 at 2 54 58 pm](https://github.com/user-attachments/assets/da284db2-8b14-43fc-9a6a-926891134513)
-![output_trimmed_enhanced_reduced](https://github.com/user-attachments/assets/efc29fa3-0512-4009-bbfc-924c780aff54)
-![Screenshot 2024-12-07 at 3 15 18 pm](https://github.com/user-attachments/assets/5d12ffcc-027a-47b6-9380-47b3d0347ad6)
-![Screenshot 2024-12-07 at 3 20 19 pm](https://github.com/user-attachments/assets/51da90a3-3365-4aa3-8122-b88ccb6869c6)
-![output_trimmed_enhanced_reduced](https://github.com/user-attachments/assets/84651473-bdbb-4318-867a-8080a741e39a)
-![output_trimmed_enhanced_reduced](https://github.com/user-attachments/assets/d4ccb7d3-2e31-497b-b664-703b9172dd11)
-![output_trimmed_enhanced_reduced](https://github.com/user-attachments/assets/31937008-a727-47f9-bc13-62f9af4aba0c)
-
 ---
-_More features yet to come, as well as responsive mobile support._
